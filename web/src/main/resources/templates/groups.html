@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Группы — HR Университет</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1E3A8A, #3B82F6);
+            color: #111827;
+            padding: 2rem;
+        }
+        .groups-card {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            padding: 2rem;
+        }
+        .groups-card h1 {
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .btn-custom {
+            border-radius: 0.5rem;
+            font-weight: 500;
+        }
+        table th, table td {
+            vertical-align: middle;
+        }
+        .table-hover tbody tr:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="groups-card">
+        <h1>Управление группами</h1>
+
+        <div class="mb-3 d-flex justify-content-between">
+            <a th:href="@{/dashboard}" class="btn btn-secondary btn-custom">Назад</a>
+
+            <!-- Кнопки только для админа -->
+            <th:block th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
+                <a th:href="@{/groups/create}" class="btn btn-primary btn-custom">Добавить группу</a>
+                <a th:href="@{/students}" class="btn btn-info btn-custom">К студентам</a>
+            </th:block>
+
+            <!-- Для юзера -->
+            <th:block th:if="${#authorization.expression('hasRole(''USER'')')}">
+                <span class="text-muted">Только просмотр</span>
+            </th:block>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Название</th>
+                    <th>Действия</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="group : ${groups}">
+                    <td th:text="${group.id}">1</td>
+                    <td th:text="${group.name}">ПИ-2-19</td>
+                    <td>
+                        <!-- Кнопки удаления только для админа -->
+                        <th:block th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
+                            <a th:href="@{/groups/delete/{id}(id=${group.id})}"
+                               class="btn btn-danger btn-sm btn-custom"
+                               onclick="return confirm('Удалить группу?')">Удалить</a>
+                        </th:block>
+
+                        <!-- Для юзера -->
+                        <th:block th:if="${#authorization.expression('hasRole(''USER'')')}">
+                            <span class="text-muted">Нет доступа</span>
+                        </th:block>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

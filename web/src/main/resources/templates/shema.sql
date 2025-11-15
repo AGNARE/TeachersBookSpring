@@ -1,0 +1,7 @@
+--CREATE TABLE IF NOT EXISTS students (
+--    id SERIAL PRIMARY KEY,
+--    group_id INTEGER REFERENCES groups(id) ON DELETE SET NULL,
+--    full_name VARCHAR(255) NOT NULL,
+--    date_born DATE,
+--    course INTEGER
+--);
