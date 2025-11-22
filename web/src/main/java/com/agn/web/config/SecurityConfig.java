@@ -1,81 +1,57 @@
 package com.agn.web.config;
 
+import com.agn.web.service.CustomUserDetailsService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-
-import java.util.List;
-import java.util.Map;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
-    private static final Map<String, String> USER_ROLES = Map.of(
-            "admin", "ADMIN",
-            "argen", "USER",
-            "testuser", "USER"
-    );
-
-    @Bean
-    public InMemoryUserDetailsManager userDetailsService() {
-
-        List<UserDetails> users = USER_ROLES.entrySet()
-                .stream()
-                .map(entry -> User
-                        .withUsername(entry.getKey())
-                        .password("{noop}1234") // простой пароль (без шифрования)
-                        .roles(entry.getValue())
-                        .build())
-                .toList();
-
-        return new InMemoryUserDetailsManager(users);
-    }
+    private final CustomUserDetailsService userDetailsService;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(auth -> auth
-
-                        .requestMatchers("/", "/login").permitAll()
-                        .requestMatchers(
-                                "/groups/create",
-                                "/groups/edit/**",
-                                "/groups/update/**",
-                                "/groups/delete/**",
-                                "/students/create",
-                                "/students/save",
-                                "/students/edit/**",
-                                "/students/update/**",
-                                "/students/delete/**"
-                        ).hasRole("ADMIN")
-
-                        // Доступно и админу, и юзеру
-                        .requestMatchers(
-                                "/groups",
-                                "/groups/view/**",
-                                "/students",
-                                "/students/view/**"
-                        ).hasAnyRole("ADMIN", "USER")
-
+        http
+                .csrf(AbstractHttpConfigurer::disable) // Для REST API CSRF обычно отключают (если используем JWT)
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/**").permitAll() // Временно разрешаем все API запросы для отладки
                         .anyRequest().authenticated()
                 )
-                .formLogin(form -> form
-                        .loginPage("/login")
-                        .defaultSuccessUrl("/dashboard", true)
-                        .permitAll()
-                )
-                .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login?logout")
-                        .permitAll()
-                )
-                .csrf(csrf -> csrf.disable());
+                // Пока оставляем formLogin для тестирования, но в будущем перейдем на JWT
+                // .formLogin(AbstractHttpConfigurer::disable) 
+                .httpBasic(AbstractHttpConfigurer::disable); // Отключаем Basic Auth
 
         return http.build();
+    }
+
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder());
+        return authProvider;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }

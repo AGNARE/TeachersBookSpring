@@ -1,6 +1,6 @@
 package com.agn.web.controller;
 
-import com.agn.web.entity.GroupDTO;
+import com.agn.web.entity.Group;
 import com.agn.web.service.GroupService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -22,12 +22,12 @@ public class GroupController {
 
     @GetMapping("/create")
     public String showCreateForm(Model model) {
-        model.addAttribute("group", new GroupDTO());
+        model.addAttribute("group", new Group());
         return "create-group";
     }
 
     @PostMapping
-    public String createGroup(@ModelAttribute GroupDTO group) {
+    public String createGroup(@ModelAttribute Group group) {
         groupService.saveGroup(group);
         return "redirect:/groups";
     }

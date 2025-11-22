@@ -1,8 +1,7 @@
 package com.agn.web.service;
 
 
-import com.agn.web.entity.StudentDTO;
-import com.agn.web.repository.GroupRepository;
+import com.agn.web.entity.Student;
 import com.agn.web.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,23 +12,22 @@ import java.util.List;
 public class StudentServiceImpl implements StudentService{
 
     private final StudentRepository studentRepository;
-    private final GroupRepository groupRepository;
 
 
     @Override
-    public List<StudentDTO> getAllStudents() {
+    public List<Student> getAllStudents() {
         return studentRepository.findAll();
     }
 
     @Override
-    public StudentDTO saveStudent(StudentDTO student) {
+    public Student saveStudent(Student student) {
         return studentRepository.save(student);
     }
 
     @Override
-    public StudentDTO getStudentById(Long id) {
+    public Student getStudentById(Long id) {
             return studentRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Student not found with id: " + id));
+                    .orElseThrow(() -> new RuntimeException("Студент не найден"));
     }
 
     @Override
@@ -38,13 +36,22 @@ public class StudentServiceImpl implements StudentService{
     }
 
     @Override
-    public StudentDTO updateStudent(Long id, StudentDTO studentDetails) {
-        StudentDTO student = getStudentById(id);
+    public Student updateStudent(Long id, Student studentDetails) {
+        Student student = getStudentById(id);
         student.setFirstName(studentDetails.getFirstName());
         student.setLastName(studentDetails.getLastName());
         student.setMiddleName(studentDetails.getMiddleName());
         student.setDateBorn(studentDetails.getDateBorn());
         student.setGroup(studentDetails.getGroup());
         return studentRepository.save(student);
+    }
+
+    @Override
+    public List<Student> getStudentsByGroupId(Long groupId) {
+        // TODO: Реализовать метод в репозитории, если нужно фильтровать по группе
+        // Пока возвращаем всех (или нужно добавить метод в репозиторий)
+        return studentRepository.findAll().stream()
+                .filter(s -> s.getGroup() != null && s.getGroup().getId().equals(groupId))
+                .toList();
     }
 }

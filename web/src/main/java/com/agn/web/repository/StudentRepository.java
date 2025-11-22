@@ -1,9 +1,12 @@
 package com.agn.web.repository;
 
-import com.agn.web.entity.StudentDTO;
-import lombok.RequiredArgsConstructor;
+import com.agn.web.entity.Student;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
-public interface StudentRepository extends JpaRepository<StudentDTO, Long> { }
+public interface StudentRepository extends JpaRepository<Student, Long> {
+    List<Student> findByGroupId(Long groupId);
+}
