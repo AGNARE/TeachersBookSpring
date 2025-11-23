@@ -312,17 +312,6 @@ TeachersBookSpring/
 
 ---
 
-## 🔧 Конфигурация
-
-### Backend (application.properties)
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5433/db_students
-spring.datasource.username=postgres
-spring.datasource.password=AgnDataBase
-server.port=8181
-spring.jpa.hibernate.ddl-auto=update
-```
-
 ### Frontend (vite.config.ts)
 ```typescript
 server: {
