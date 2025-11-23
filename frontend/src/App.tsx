@@ -6,6 +6,7 @@ import Groups from './pages/Groups'
 import Students from './pages/Students'
 import Subjects from './pages/Subjects'
 import UsersManagement from './pages/UsersManagement';
+import AssignDisciplines from './pages/AssignDisciplines';
 import ProtectedRoute from './components/ProtectedRoute'
 import Layout from './components/Layout'
 
@@ -23,6 +24,7 @@ function App() {
                     <Route path="/students" element={<Students />} />
                     <Route path="/subjects" element={<Subjects />} />
                     <Route path="/users-management" element={<UsersManagement />} />
+                    <Route path="/assign-disciplines" element={<AssignDisciplines />} />
                 </Route>
             </Route>
         </Routes>

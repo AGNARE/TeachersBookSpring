@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, UserCircle } from 'lucide-react';
+import { Plus, Trash2, UserCircle, Edit2 } from 'lucide-react';
 import api from '../api/axios';
+import AssignmentEditModal from '../components/AssignmentEditModal';
+import DeleteConfirmModal from '../components/DeleteConfirmModal';
 
 interface Subject {
     id: number;
@@ -32,14 +34,18 @@ interface DisciplineGroup {
 const AssignDisciplines = () => {
     const [subjects, setSubjects] = useState<Subject[]>([]);
     const [groups, setGroups] = useState<Group[]>([]);
+    const [teachers, setTeachers] = useState<User[]>([]);
     const [assignments, setAssignments] = useState<DisciplineGroup[]>([]);
 
     const [selectedSubject, setSelectedSubject] = useState<number>(0);
     const [selectedGroup, setSelectedGroup] = useState<number>(0);
+    const [selectedTeacher, setSelectedTeacher] = useState<number>(0);
     const [semester, setSemester] = useState<number>(1);
     const [year, setYear] = useState<number>(new Date().getFullYear());
 
     const [loading, setLoading] = useState(false);
+    const [editingAssignment, setEditingAssignment] = useState<DisciplineGroup | null>(null);
+    const [deletingAssignment, setDeletingAssignment] = useState<DisciplineGroup | null>(null);
 
     useEffect(() => {
         fetchData();
@@ -47,19 +53,17 @@ const AssignDisciplines = () => {
 
     const fetchData = async () => {
         try {
-            const [subjectsRes, groupsRes, assignmentsRes] = await Promise.all([
+            const [subjectsRes, groupsRes, assignmentsRes, teachersRes] = await Promise.all([
                 api.get('/subjects'),
                 api.get('/groups'),
-                api.get('/discipline-groups')
+                api.get('/discipline-groups'),
+                api.get('/users/teachers')
             ]);
 
             setSubjects(subjectsRes.data);
             setGroups(groupsRes.data);
             setAssignments(assignmentsRes.data);
-
-            // TODO: Добавить эндпоинт для получения преподавателей
-            // const teachersRes = await api.get('/users/teachers');
-            // setTeachers(teachersRes.data);
+            setTeachers(teachersRes.data);
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -68,8 +72,8 @@ const AssignDisciplines = () => {
     const handleAssign = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!selectedSubject || !selectedGroup) {
-            alert('Заполните все обязательные поля');
+        if (!selectedSubject || !selectedGroup || !selectedTeacher) {
+            alert('Заполните все обязательные поля (дисциплина, группа, преподаватель)');
             return;
         }
 
@@ -78,7 +82,7 @@ const AssignDisciplines = () => {
             await api.post('/discipline-groups', {
                 subject: { id: selectedSubject },
                 group: { id: selectedGroup },
-                // teacher omitted; nullable in DB
+                teacher: { id: selectedTeacher },
                 semester,
                 year
             });
@@ -87,6 +91,7 @@ const AssignDisciplines = () => {
             // Reset form
             setSelectedSubject(0);
             setSelectedGroup(0);
+            setSelectedTeacher(0);
             setSemester(1);
             setYear(new Date().getFullYear());
         } catch (error) {
@@ -97,15 +102,16 @@ const AssignDisciplines = () => {
         }
     };
 
-    const handleDelete = async (id: number) => {
-        if (window.confirm('Удалить это назначение?')) {
-            try {
-                await api.delete(`/discipline-groups/${id}`);
-                setAssignments(assignments.filter(a => a.id !== id));
-            } catch (error) {
-                console.error('Error deleting assignment:', error);
-                alert('Ошибка при удалении');
-            }
+    const handleDelete = async () => {
+        if (!deletingAssignment) return;
+
+        try {
+            await api.delete(`/discipline-groups/${deletingAssignment.id}`);
+            setAssignments(assignments.filter(a => a.id !== deletingAssignment.id));
+            setDeletingAssignment(null);
+        } catch (error) {
+            console.error('Error deleting assignment:', error);
+            alert('Ошибка при удалении');
         }
     };
 
@@ -119,7 +125,7 @@ const AssignDisciplines = () => {
             {/* Форма назначения */}
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
                 <h2 className="text-lg font-semibold text-slate-900 mb-4">Новое назначение</h2>
-                <form onSubmit={handleAssign} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                <form onSubmit={handleAssign} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
                     <div>
                         <label className="block text-sm font-medium text-slate-700 mb-1">
                             Дисциплина <span className="text-red-500">*</span>
@@ -150,6 +156,25 @@ const AssignDisciplines = () => {
                             <option value={0}>Выберите группу</option>
                             {groups.map(g => (
                                 <option key={g.id} value={g.id}>{g.name}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">
+                            Преподаватель <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                            required
+                            value={selectedTeacher}
+                            onChange={(e) => setSelectedTeacher(parseInt(e.target.value))}
+                            className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                            <option value={0}>Выберите преподавателя</option>
+                            {teachers.map(t => (
+                                <option key={t.id} value={t.id}>
+                                    {t.firstName} {t.lastName}
+                                </option>
                             ))}
                         </select>
                     </div>
@@ -193,10 +218,6 @@ const AssignDisciplines = () => {
                         </button>
                     </div>
                 </form>
-
-                <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
-                    <strong>Примечание:</strong> Назначение преподавателя временно отключено. Все назначения будут для текущего пользователя (admin).
-                </div>
             </div>
 
             {/* Список назначений */}
@@ -247,12 +268,22 @@ const AssignDisciplines = () => {
                                         <td className="px-6 py-4 text-slate-600">{assignment.semester}</td>
                                         <td className="px-6 py-4 text-slate-600">{assignment.year}</td>
                                         <td className="px-6 py-4 text-right">
-                                            <button
-                                                onClick={() => handleDelete(assignment.id)}
-                                                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
+                                            <div className="flex items-center justify-end space-x-2">
+                                                <button
+                                                    onClick={() => setEditingAssignment(assignment)}
+                                                    className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                    title="Редактировать"
+                                                >
+                                                    <Edit2 className="w-4 h-4" />
+                                                </button>
+                                                <button
+                                                    onClick={() => setDeletingAssignment(assignment)}
+                                                    className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                    title="Удалить"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))
@@ -261,6 +292,25 @@ const AssignDisciplines = () => {
                     </table>
                 </div>
             </div>
+
+            {/* Модальное окно редактирования */}
+            {editingAssignment && (
+                <AssignmentEditModal
+                    assignment={editingAssignment}
+                    onClose={() => setEditingAssignment(null)}
+                    onSave={fetchData}
+                />
+            )}
+
+            {/* Модальное окно подтверждения удаления */}
+            {deletingAssignment && (
+                <DeleteConfirmModal
+                    title="Удалить назначение?"
+                    message={`Вы уверены, что хотите удалить назначение "${deletingAssignment.subject.shortName}" для группы "${deletingAssignment.group.name}"?`}
+                    onConfirm={handleDelete}
+                    onCancel={() => setDeletingAssignment(null)}
+                />
+            )}
         </div>
     );
 };

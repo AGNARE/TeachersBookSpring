@@ -35,6 +35,14 @@ public class DisciplineGroupServiceImpl implements DisciplineGroupService {
     @Override
     public DisciplineGroup getDisciplineGroupById(Long id) {
         return disciplineGroupRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("DisciplineGroup not found with id: " + id));
+    }
+
+    @Override
+    @Transactional
+    public DisciplineGroup saveDisciplineGroup(DisciplineGroup disciplineGroup) {
+        return disciplineGroupRepository.save(disciplineGroup);
+    }
 
     @Override
     @Transactional
