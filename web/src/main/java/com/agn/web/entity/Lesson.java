@@ -1,5 +1,8 @@
 package com.agn.web.entity;
 
+import com.agn.web.entity.group.Group;
+import com.agn.web.entity.subject.LessonType;
+import com.agn.web.entity.subject.Subject;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -36,11 +39,4 @@ public class Lesson {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private LessonType type;
-
-    public enum LessonType {
-        LECTURE,
-        LAB,
-        PRACTICE,
-        SEMINAR
-    }
 }

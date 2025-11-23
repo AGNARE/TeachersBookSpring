@@ -1,6 +1,6 @@
 package com.agn.web.dto;
 
-import com.agn.web.entity.Role;
+import com.agn.web.entity.user.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

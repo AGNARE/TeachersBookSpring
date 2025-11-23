@@ -1,5 +1,15 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Users, GraduationCap, BookOpen, Link2, LogOut, UserCheck } from 'lucide-react';
+import {
+    LayoutDashboard,
+    Users,
+    GraduationCap,
+    BookOpen,
+    Link2,
+    LogOut,
+    UserCheck,
+    ClipboardList,
+    Calendar
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Sidebar = () => {
@@ -9,9 +19,11 @@ const Sidebar = () => {
         { path: '/dashboard', icon: LayoutDashboard, label: 'Дашборд' },
         { path: '/subjects', icon: BookOpen, label: 'Дисциплины' },
         { path: '/assign-disciplines', icon: Link2, label: 'Назначение' },
+        { path: '/schedule', icon: Calendar, label: 'Расписание' },
         { path: '/groups', icon: Users, label: 'Группы' },
         { path: '/students', icon: GraduationCap, label: 'Студенты' },
         { path: '/users-management', icon: UserCheck, label: 'Пользователи' },
+        { path: '/grades-attendance', icon: ClipboardList, label: 'Журнал' },
     ];
 
     return (

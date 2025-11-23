@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import { NavLink } from 'react-router-dom';
-import { UserCheck, UserPlus, Users, User } from 'lucide-react';
+import { UserPlus } from 'lucide-react';
 import api from '../api/axios';
 import UserModal from '../components/UserModal';
 
