@@ -1,7 +1,9 @@
 package com.agn.web.controller.group;
 
+import com.agn.web.dto.GroupDeletionInfoDTO;
 import com.agn.web.entity.group.Group;
 import com.agn.web.service.group.GroupService;
+import com.agn.web.service.user.UserContextService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,10 +16,16 @@ import java.util.List;
 public class GroupRestController {
 
     private final GroupService groupService;
+    private final UserContextService userContextService;
 
     @GetMapping
     public List<Group> getAllGroups() {
-        return groupService.getAllGroups();
+        // ADMIN видит все группы, TEACHER - только свои
+        if (userContextService.isAdmin()) {
+            return groupService.getAllGroups();
+        } else {
+            return groupService.getGroupsForTeacher(userContextService.getCurrentUserId());
+        }
     }
 
     @PostMapping
@@ -29,6 +37,20 @@ public class GroupRestController {
     public ResponseEntity<Group> getGroupById(@PathVariable Long id) {
         try {
             return ResponseEntity.ok(groupService.getGroupById(id));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * Получить информацию о том, что будет удалено вместе с группой.
+     * @param id ID группы
+     * @return информация об удалении
+     */
+    @GetMapping("/{id}/deletion-info")
+    public ResponseEntity<GroupDeletionInfoDTO> getDeletionInfo(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(groupService.getDeletionInfo(id));
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }

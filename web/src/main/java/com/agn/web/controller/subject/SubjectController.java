@@ -1,7 +1,9 @@
 package com.agn.web.controller.subject;
 
+import com.agn.web.dto.SubjectDeletionInfoDTO;
 import com.agn.web.entity.subject.Subject;
 import com.agn.web.service.subject.SubjectService;
+import com.agn.web.service.user.UserContextService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,10 +16,16 @@ import java.util.List;
 public class SubjectController {
 
     private final SubjectService subjectService;
+    private final UserContextService userContextService;
 
     @GetMapping
     public List<Subject> getAllSubjects() {
-        return subjectService.getAllSubjects();
+        // ADMIN видит все дисциплины, TEACHER - только свои
+        if (userContextService.isAdmin()) {
+            return subjectService.getAllSubjects();
+        } else {
+            return subjectService.getSubjectsForTeacher(userContextService.getCurrentUserId());
+        }
     }
 
     @GetMapping("/{id}")
@@ -39,6 +47,20 @@ public class SubjectController {
         try {
             subject.setId(id);
             return ResponseEntity.ok(subjectService.saveSubject(subject));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * Получить информацию о том, что будет удалено вместе с дисциплиной.
+     * @param id ID дисциплины
+     * @return информация об удалении
+     */
+    @GetMapping("/{id}/deletion-info")
+    public ResponseEntity<SubjectDeletionInfoDTO> getDeletionInfo(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(subjectService.getDeletionInfo(id));
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }

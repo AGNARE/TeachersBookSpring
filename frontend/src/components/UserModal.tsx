@@ -7,7 +7,7 @@ interface UserModalProps {
     refresh: () => void;
 }
 
-type RoleOption = 'TEACHER' | 'STUDENT';
+type RoleOption = 'ADMIN' | 'TEACHER' | 'STUDENT';
 
 const UserModal: React.FC<UserModalProps> = ({ onClose, refresh }) => {
     const [firstName, setFirstName] = useState('');
@@ -68,6 +68,7 @@ const UserModal: React.FC<UserModalProps> = ({ onClose, refresh }) => {
                             onChange={e => setRole(e.target.value as RoleOption)}
                             className="w-full border rounded px-2 py-1"
                         >
+                            <option value="ADMIN">Администратор</option>
                             <option value="TEACHER">Преподаватель</option>
                             <option value="STUDENT">Студент</option>
                         </select>

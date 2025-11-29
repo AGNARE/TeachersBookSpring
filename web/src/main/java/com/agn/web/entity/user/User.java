@@ -24,7 +24,10 @@ public class User {
     private String username;
 
     @Column(nullable = false)
-    private String password;
+    private String password;  // Захешированный пароль
+    
+    @Column(name = "plain_password")
+    private String plainPassword;  // Пароль в открытом виде для отображения админу
 
     private String firstName;
     private String lastName;

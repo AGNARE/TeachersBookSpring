@@ -20,6 +20,14 @@ public class UserController {
     private final UserRepository userRepository;
 
     /**
+     * Получить всех пользователей.
+     */
+    @GetMapping
+    public ResponseEntity<List<User>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
+    }
+
+    /**
      * Generate username and raw password based on firstName and lastName.
      * This endpoint can be used by the admin UI to preview credentials before creating the user.
      */
@@ -48,5 +56,11 @@ public class UserController {
     public ResponseEntity<List<User>> getStudents() {
         List<User> students = userRepository.findByRole(com.agn.web.entity.user.Role.STUDENT);
         return ResponseEntity.ok(students);
+    }
+
+    @GetMapping("/admins")
+    public ResponseEntity<List<User>> getAdmins() {
+        List<User> admins = userRepository.findByRole(com.agn.web.entity.user.Role.ADMIN);
+        return ResponseEntity.ok(admins);
     }
 }
