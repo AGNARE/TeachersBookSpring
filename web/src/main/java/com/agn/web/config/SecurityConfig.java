@@ -1,6 +1,6 @@
 package com.agn.web.config;
 
-import com.agn.web.service.CustomUserDetailsService;
+import com.agn.web.service.user.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

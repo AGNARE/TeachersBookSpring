@@ -1,8 +1,8 @@
 package com.agn.web.config;
 
-import com.agn.web.entity.Role;
-import com.agn.web.entity.User;
-import com.agn.web.repository.UserRepository;
+import com.agn.web.entity.user.Role;
+import com.agn.web.entity.user.User;
+import com.agn.web.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;

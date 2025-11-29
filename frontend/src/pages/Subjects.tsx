@@ -10,6 +10,7 @@ interface Subject {
     shortName: string;
     description?: string;
     credits?: number;
+    lessonTypes?: string[];
 }
 
 const Subjects = () => {
